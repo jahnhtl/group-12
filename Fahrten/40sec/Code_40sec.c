@@ -99,7 +99,24 @@ void loop() {
   // Einstellung des Motor-Speed basierend auf dem Frontsensor
   motorSpeed = map(distanceFront, 0, 130, 170, 255); // Ändern Sie den Wertebereich entsprechend Ihrer Anforderungen
 
-  if (millis() - circle >= circleTarget) {
+  
+    if (isRunning) {
+      // Überprüfen, ob eine Kurve erkannt wurde
+      if (distanceLeft > 35 || distanceRight > 35) {
+        // Wenn eine Kurve erkannt wurde, die Geschwindigkeiten der Motoren anpassen, um die Kurve zu fahren
+        mode = 1;
+        adjustForCurve(distanceLeft, distanceRight, distanceFront);
+      } else {
+        // Ansonsten normales Fahrverhalten beibehalten
+        mode = 0;
+        float korrektur = calculateCorrection(sensorSumLeft, sensorSumRight);
+        adjustMotorSpeeds(korrektur);
+      }
+    } else {
+      stop();
+    }
+	
+	if (millis() - circle >= circleTarget) {
     circle = millis();
     lcd.clear();
     
@@ -121,22 +138,6 @@ void loop() {
     lcd.setCursor(12, 1);
     lcd.print(intensityFactor);
   }
-  
-    if (isRunning) {
-      // Überprüfen, ob eine Kurve erkannt wurde
-      if (distanceLeft > 35 || distanceRight > 35) {
-        // Wenn eine Kurve erkannt wurde, die Geschwindigkeiten der Motoren anpassen, um die Kurve zu fahren
-        mode = 1;
-        adjustForCurve(distanceLeft, distanceRight, distanceFront);
-      } else {
-        // Ansonsten normales Fahrverhalten beibehalten
-        mode = 0;
-        float korrektur = calculateCorrection(sensorSumLeft, sensorSumRight);
-        adjustMotorSpeeds(korrektur);
-      }
-    } else {
-      stop();
-    }
 }
 
 void adjustForCurve(int distanceLeft, int distanceRight, int distanceFront) {
